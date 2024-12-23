@@ -28,7 +28,7 @@ async function getItemsApi(){
 }
 
 async function createTaskApi(data){
-    const res =await fetch(BASE_URL, {
+    const res = await fetch(BASE_URL, {
         method: 'POST',
         body: JSON.stringify({
             text: data.text,
@@ -45,6 +45,37 @@ async function createTaskApi(data){
 
     return await res.json()
 }
+
+
+async function changeStatusApi(id) {
+    const res = await fetch(BASE_URL, {
+        method: 'PATCH',
+        body: JSON.stringify({
+            id: id
+        })
+    })
+    if (!res.ok){
+        console.log("Чето пошло не так");
+        return
+        
+    }
+    return await res.json()
+}
+
+async function deleteTaskApi(id) {
+    const res = await fetch(BASE_URL, {
+        method: 'DELETE',
+        body: JSON.stringify({
+            id: id
+        })
+    })
+    if (!res.ok) {
+        console.log("Чето пошло не так");
+        return
+    }
+    return
+}
+
 
 
 // async function createTaskApi(data) {
@@ -90,39 +121,38 @@ async function init() {
 
 
 
-function deleteById(id) {//функция удаления элемента из массива
+async function deleteById(id) {//функция удаления элемента из массива
+    const item = await deleteTaskApi(id)
+    const idx = data.findIndex((i) => {
+        return i.id === id
+    })
+    data.splice(idx, 1)
     
-    // const idx = data.findIndex((i) => {
-    //     return i.id === id
-    // })
-    // data.splice(idx, 1)
+    render()
     
-    // render()
-    
-    const index = data.findIndex(item => item.id === id)
-    if (index !== -1) { 
-        data.splice(index, 1) //Если задача найдена, она удаляется из массива
-        // syncData()
-        render()
-    }
+    // const index = data.findIndex(item => item.id === id)
+    // if (index !== -1) { 
+    //     data.splice(index, 1) //Если задача найдена, она удаляется из массива
+    //     // syncData()
+    //     render()
+    // }
 }
 
-function changeStatus(id) { //обновляет статус задачи
+async function changeStatus(id) { //обновляет статус задачи
+    const item = await changeStatusApi(id)
+    const idx = data.findIndex((i) =>{
+        return i.id === id
+    })
+    data[idx] = item
+    render()
     
-    // const item = data.find((i) => {
-    //     return i.id === id
-    // })
-    // item.isDone = !item.isDone
-    
-    // render()
-    
-    const task = data.find(item => item.id === id);
+    // const task = data.find(item => item.id === id);
 
-    if (task) {
-        task.isDone = !task.isDone; //изменение статуса задачи (isDone) на противоположный
-        // syncData()
-        render()
-    }
+    // if (task) {
+    //     task.isDone = !task.isDone; //изменение статуса задачи (isDone) на противоположный
+    //     // syncData()
+    //     render()
+    // }
 }
 
 
@@ -181,7 +211,9 @@ function createTask(objectData){ ///создание таски
 
     })
 
-    root.addEventListener('click', () => changeStatus(objectData.id)); //при нажатии на задачу менятся ее статус, сделано/не сделано
+    root.addEventListener('click', async () => {
+        await changeStatus(objectData.id)
+    }); //при нажатии на задачу менятся ее статус, сделано/не сделано
 
     root.appendChild(chekinput)
     root.appendChild(txt)

@@ -59,7 +59,18 @@ const server = createServer((req, res) => {
   }
 
   // ToDO Delete Task
-  if (url === '/tasks' && method === 'DELETE') { }
+  if (url === '/tasks' && method === 'DELETE') {
+    let body = [];
+        req.on('data', chunk => {
+            body.push(chunk);
+            console.log(chunk);
+        }).on('end', () => {
+            body = Buffer.concat(body).toString();
+            const requestData = JSON.parse(body)
+            const result = deleteTask(requestData.id)
+            res.end()
+        });
+   }
 
   if (url === '/tasks' && method === 'GET') {
     const result = getData()
